@@ -54,6 +54,7 @@ class Game extends React.Component {
       }],
       stepNumber: 0,
       xIsNext: true,
+      descending: false
     };
   }
 
@@ -79,7 +80,7 @@ class Game extends React.Component {
   jumpTo(step) {
     this.setState({
       stepNumber: step,
-      xIsNext: (step % 2) === 0,
+      xIsNext: (step % 2) === 0
     });
   }
 
@@ -87,20 +88,24 @@ class Game extends React.Component {
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
+    const descending = this.state.descending;
 
-    const moves = history.map((step, move) => {
-      const desc = move ?
-          'Go to move #' + move :
+    const moves = [];
+
+    for (let i = (descending ? history.length - 1 : 0); (descending ? i >= 0 : i < history.length); (descending ? i-- : i++)) {
+      const step = history[i];
+      const desc = i ?
+          'Go to move #' + i :
           'Go to game start';
-      return (
-          <li key={move}>
-            <span style={{"fontWeight": move === this.state.stepNumber ? "bold" : "normal"}}>
+      moves.push((
+          <li key={i}>
+            <span style={{"fontWeight": i === this.state.stepNumber ? "bold" : "normal"}}>
               {step.lastMove ? (`(${step.lastMove.column}, ${step.lastMove.row}) `) : "None "}
             </span>
-            <button onClick={() => this.jumpTo(move)}>{desc}</button>
+            <button onClick={() => this.jumpTo(i)}>{desc}</button>
           </li>
-      );
-    });
+      ));
+    }
 
     let status;
     if (winner) {
@@ -125,6 +130,9 @@ class Game extends React.Component {
           </div>
           <div className="game-info">
             <div>{status}</div>
+            Move order: {descending ? "Descending" : "Ascending"} <button onClick={() => {
+              this.setState({descending: !descending});
+            }}>Change</button>
             <ol>{moves}</ol>
           </div>
         </div>
